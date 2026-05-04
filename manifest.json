@@ -1,0 +1,17 @@
+{
+  "name": "Máy Tính Đọc Kết Quả",
+  "short_name": "Máy Tính",
+  "description": "Máy tính có giọng đọc kết quả tiếng Việt chuyên nghiệp",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#b8b8b8",
+  "theme_color": "#b8b8b8",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
