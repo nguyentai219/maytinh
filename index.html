@@ -5,13 +5,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Máy Tính Đọc Kết Quả</title>
 
-<meta name="theme-color" content="#b8b8b8">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon.png">
+<!-- PWA & Icons -->
 <link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32x32.png">
+<link rel="icon" type="image/png" sizes="96x96" href="icons/icon-96x96.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152x152.png">
+<link rel="apple-touch-icon" sizes="167x167" href="icons/icon-167x167.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180x180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Máy Tính">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#4e8e97">
+<meta name="description" content="Máy tính đọc kết quả bằng tiếng Việt – hỗ trợ giọng nói, lịch sử tính, tiền tệ">
 
+<!-- Fonts -->
 <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400;500;700&family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 
@@ -30,6 +42,7 @@ body {
   font-family:'Be Vietnam Pro',sans-serif; overflow:hidden;
 }
 
+/* ── PHONE ── */
 .phone {
   width:100%; max-width:430px; height:100vh;
   background:
@@ -40,6 +53,7 @@ body {
   box-shadow: inset 3px 0 7px rgba(255,255,255,0.5), inset -3px 0 7px rgba(0,0,0,0.2);
 }
 
+/* ── TOPBAR ── */
 .topbar {
   display:flex; align-items:center; justify-content:space-between;
   padding:10px 2px 5px; flex-shrink:0;
@@ -54,6 +68,7 @@ body {
 .topbar-title .t1 { font-size:13px; font-weight:800; color:#1e1e1e; letter-spacing:0.6px; }
 .topbar-title .t2 { font-size:9px; font-weight:400; color:#666; letter-spacing:1.8px; margin-top:1px; }
 
+/* ── DISPLAY ── */
 .display-wrap {
   margin:2px 0 9px;
   background:linear-gradient(175deg,#6aafb8 0%,#84c6cf 50%,#6aafb8 100%);
@@ -64,6 +79,7 @@ body {
   display:flex; flex-direction:column; gap:0;
 }
 
+/* Zone A – phép tính */
 .zone-a {
   border-bottom:1px solid rgba(0,0,0,0.14);
   padding-bottom:7px; margin-bottom:6px;
@@ -78,6 +94,7 @@ body {
   text-align:right; word-break:break-all; min-height:36px; line-height:1.4;
 }
 
+/* Zone B – số */
 .zone-b { margin-bottom:4px; }
 .zone-number {
   font-family:'Roboto Mono',monospace;
@@ -89,6 +106,7 @@ body {
 @keyframes numPop{0%{transform:scale(1)}50%{transform:scale(1.045)}100%{transform:scale(1)}}
 .zone-number.speaking { color:#003a46; }
 
+/* Zone C – hàng cuối: wave trái | chữ Việt phải */
 .zone-c {
   display:flex; align-items:center; justify-content:space-between;
   min-height:22px; margin-top:2px; gap:8px;
@@ -118,10 +136,10 @@ body {
 .zone-cur { font-size:11px; font-weight:700; color:rgba(0,0,0,0.3); flex-shrink:0; }
 .zone-cur.on { color:#003d4a; }
 
+/* ── BUTTON GRID ── */
 .btn-grid { flex:1; display:flex; flex-direction:column; gap:var(--gap); min-height:0; }
 .btn-row { display:grid; gap:var(--gap); flex:1; }
 .r4 { grid-template-columns:repeat(4,1fr); }
-.r5 { grid-template-columns:repeat(5,1fr); }
 
 .btn {
   border-radius:var(--rbtn); border:none; cursor:pointer;
@@ -140,6 +158,7 @@ body {
 }
 .btn:active::after { opacity:1; }
 
+/* Number */
 .btn-n {
   background:linear-gradient(180deg,var(--num-top) 0%,var(--num-bot) 100%);
   box-shadow:0 5px 0 var(--num-sh),0 6px 9px rgba(0,0,0,0.27),
@@ -147,30 +166,35 @@ body {
   border:1px solid #b2b2b2;
   font-size:28px; font-weight:400; font-family:'Roboto Mono',monospace;
 }
+/* Operator ÷ × − + */
 .btn-op {
   background:linear-gradient(180deg,var(--op-top) 0%,var(--op-bot) 100%);
   box-shadow:0 5px 0 var(--op-sh),0 6px 9px rgba(0,0,0,0.25),
     inset 0 1px 0 rgba(255,255,255,0.72);
   border:1px solid #9a9ea6; font-size:26px; color:#111;
 }
+/* Function AC % +/− */
 .btn-fn {
   background:linear-gradient(180deg,var(--fn-top) 0%,var(--fn-bot) 100%);
   box-shadow:0 5px 0 var(--fn-sh),0 6px 9px rgba(0,0,0,0.24),
     inset 0 1px 0 rgba(255,255,255,0.74);
   border:1px solid #a2a5ac; font-size:17px; font-weight:700; color:#222;
 }
+/* AC red */
 .btn-ac {
   background:linear-gradient(180deg,var(--ac-top) 0%,var(--ac-bot) 100%);
   box-shadow:0 5px 0 var(--ac-sh),0 6px 9px rgba(0,0,0,0.35),
     inset 0 1px 0 rgba(255,200,200,0.55);
   border:1px solid #a02828; color:#fff; font-size:20px; font-weight:800;
 }
+/* Backspace */
 .btn-back {
   background:linear-gradient(180deg,var(--fn-top) 0%,var(--fn-bot) 100%);
   box-shadow:0 5px 0 var(--fn-sh),0 6px 9px rgba(0,0,0,0.24),
     inset 0 1px 0 rgba(255,255,255,0.74);
   border:1px solid #a2a5ac; color:#333; font-size:21px;
 }
+/* Equals orange */
 .btn-eq {
   background:linear-gradient(180deg,var(--eq-top) 0%,var(--eq-bot) 100%);
   box-shadow:0 5px 0 var(--eq-sh),0 6px 9px rgba(0,0,0,0.35),
@@ -183,6 +207,7 @@ body {
   to  {box-shadow:0 5px 0 var(--eq-sh),0 10px 30px rgba(216,112,24,0.85);}
 }
 
+/* ── OVERLAY ── */
 .overlay {
   position:absolute; inset:0; z-index:200;
   display:flex; flex-direction:column;
@@ -214,6 +239,7 @@ body {
   display:flex; align-items:center; justify-content:center;
 }
 
+/* Settings */
 .s-sec { padding:10px 16px 2px; }
 .s-sec h3 {
   font-size:10px; font-weight:800; color:#999;
@@ -228,6 +254,7 @@ body {
 .s-lbl { font-size:14px; color:#1a1a1a; font-weight:600; }
 .s-sub { font-size:11px; color:#999; margin-top:2px; }
 
+/* Toggle */
 .tog { position:relative; width:48px; height:28px; flex-shrink:0; }
 .tog input { opacity:0; width:0; height:0; }
 .tog-sl {
@@ -243,6 +270,7 @@ body {
 .tog input:checked + .tog-sl { background:#e08828; }
 .tog input:checked + .tog-sl::before { transform:translateX(20px); }
 
+/* Select / Range */
 .s-sel {
   background:#f0f0f2; border:1px solid #ccc; border-radius:9px;
   padding:6px 10px; font-size:13px; color:#222; outline:none;
@@ -250,6 +278,7 @@ body {
 }
 .s-rng { width:110px; accent-color:#e08828; }
 
+/* Voice list */
 .vlist { width:100%; border-radius:10px; overflow:hidden; background:#fff; margin-top:6px; }
 .vitem {
   display:flex; align-items:center; gap:10px; padding:10px 12px;
@@ -262,6 +291,7 @@ body {
 .vdot { width:9px; height:9px; border-radius:50%; background:#ddd; flex-shrink:0; }
 .vitem.sel .vdot { background:#e08828; }
 
+/* History */
 .h-acts { display:flex; gap:8px; padding:10px 16px 4px; }
 .h-clear {
   flex:1; padding:10px; border:none; border-radius:10px;
@@ -282,8 +312,9 @@ body {
 </style>
 </head>
 <body>
-<div class="phone">
+<div class="phone" id="phone">
 
+  <!-- TOPBAR -->
   <div class="topbar">
     <button class="icon-btn" onclick="openSettings()">≡</button>
     <div class="topbar-title">
@@ -293,15 +324,22 @@ body {
     <button class="icon-btn" onclick="openHistory()">🕘</button>
   </div>
 
+  <!-- DISPLAY -->
   <div class="display-wrap">
+
+    <!-- Zone A: Phép tính đã nhập -->
     <div class="zone-a">
       <div class="zone-lbl">PHÉP TÍNH ĐÃ NHẬP</div>
       <div class="zone-expr-text" id="el-expr">—</div>
     </div>
+
+    <!-- Zone B: Kết quả số -->
     <div class="zone-b">
       <div class="zone-lbl">KẾT QUẢ</div>
       <div class="zone-number" id="el-num">0</div>
     </div>
+
+    <!-- Zone C: wave bên trái | chữ Việt bên phải -->
     <div class="zone-c">
       <div class="zone-wave-side">
         <div class="wave" id="wave"><span></span><span></span><span></span><span></span><span></span></div>
@@ -314,46 +352,59 @@ body {
     </div>
   </div>
 
+  <!-- BUTTONS -->
   <div class="btn-grid">
+
+    <!-- Row 1: AC  %  +/−  ÷ -->
     <div class="btn-row r4">
       <button class="btn btn-ac" onclick="clearAll()">AC</button>
       <button class="btn btn-fn" onclick="percent()">%</button>
       <button class="btn btn-fn" onclick="toggleSign()">+/−</button>
       <button class="btn btn-op" onclick="appendOp('÷')">÷</button>
     </div>
+
+    <!-- Row 2: 7 8 9 × -->
     <div class="btn-row r4">
       <button class="btn btn-n" onclick="appendNum('7')">7</button>
       <button class="btn btn-n" onclick="appendNum('8')">8</button>
       <button class="btn btn-n" onclick="appendNum('9')">9</button>
       <button class="btn btn-op" onclick="appendOp('×')">×</button>
     </div>
+
+    <!-- Row 3: 4 5 6 − -->
     <div class="btn-row r4">
       <button class="btn btn-n" onclick="appendNum('4')">4</button>
       <button class="btn btn-n" onclick="appendNum('5')">5</button>
       <button class="btn btn-n" onclick="appendNum('6')">6</button>
       <button class="btn btn-op" onclick="appendOp('−')">−</button>
     </div>
+
+    <!-- Row 4: 1 2 3 + -->
     <div class="btn-row r4">
       <button class="btn btn-n" onclick="appendNum('1')">1</button>
       <button class="btn btn-n" onclick="appendNum('2')">2</button>
       <button class="btn btn-n" onclick="appendNum('3')">3</button>
       <button class="btn btn-op" onclick="appendOp('+')">+</button>
     </div>
-    <div class="btn-row r5">
+
+    <!-- Row 5: 0 (rộng gấp đôi)  ,  ⌫  = -->
+    <div class="btn-row" style="grid-template-columns: 2fr 1fr 1fr 1fr;">
       <button class="btn btn-n" onclick="appendNum('0')">0</button>
-      <button class="btn btn-n" onclick="appendNum('00')" style="font-size:20px;font-family:'Be Vietnam Pro',sans-serif;font-weight:800">00</button>
       <button class="btn btn-n" onclick="appendDot()" style="font-size:26px">,</button>
       <button class="btn btn-back" onclick="backspace()">⌫</button>
       <button class="btn btn-eq" id="btn-eq" onclick="onEqPress()">=</button>
     </div>
+
   </div>
 
+  <!-- ══ SETTINGS OVERLAY ══ -->
   <div class="overlay" id="ov-set" onclick="bgClose(event,'ov-set')">
     <div class="panel">
       <div class="panel-header">
         <h2>⚙️ Cài đặt</h2>
         <button class="panel-close" onclick="closeSettings()">✕</button>
       </div>
+
       <div class="s-sec">
         <h3>🎙 Giọng đọc</h3>
         <div class="s-item">
@@ -381,6 +432,7 @@ body {
           <input type="range" class="s-rng" id="sl-vol" min="0" max="1" step="0.05" value="1" oninput="updVol(this.value)">
         </div>
       </div>
+
       <div class="s-sec">
         <h3>📳 Phản hồi</h3>
         <div class="s-item">
@@ -392,17 +444,19 @@ body {
           <label class="tog"><input type="checkbox" id="tog-sound" onchange="save()"><span class="tog-sl"></span></label>
         </div>
       </div>
+
       <div class="s-sec">
         <h3>🔢 Số & Tiền tệ</h3>
         <div class="s-item">
-          <div><div class="s-lbl">Làm tròn kết quả</div><div class="s-sub">Số chữ số thập phân</div></div>
+          <div><div class="s-lbl">Làm tròn kết quả</div><div class="s-sub">Chọn cách làm tròn kết quả</div></div>
           <select class="s-sel" id="sel-round" onchange="save()">
             <option value="-1">Không làm tròn</option>
-            <option value="0">Số nguyên</option>
-            <option value="1">1 chữ số</option>
-            <option value="2" selected>2 chữ số</option>
-            <option value="3">3 chữ số</option>
-            <option value="4">4 chữ số</option>
+            <option value="1000">4 bỏ 6 lấy (hàng nghìn)</option>
+            <option value="0">Số nguyên (hàng đơn vị)</option>
+            <option value="1">1 chữ số thập phân</option>
+            <option value="2" selected>2 chữ số thập phân</option>
+            <option value="3">3 chữ số thập phân</option>
+            <option value="4">4 chữ số thập phân</option>
           </select>
         </div>
         <div class="s-item">
@@ -411,7 +465,7 @@ body {
         </div>
         <div class="s-item">
           <div><div class="s-lbl">Đơn vị tiền tệ</div><div class="s-sub">Hiển thị cạnh kết quả</div></div>
-          <select class="s-sel" id="sel-cur" onchange="save()">
+          <select class="s-sel" id="sel-unit" onchange="save()">
             <option value="">Không hiện</option>
             <option value="đ" selected>đ (Đồng)</option>
             <option value="VNĐ">VNĐ</option>
@@ -419,6 +473,7 @@ body {
           </select>
         </div>
       </div>
+
       <div class="s-sec" style="padding-bottom:18px">
         <h3>🖥 Hiển thị</h3>
         <div class="s-item">
@@ -434,6 +489,7 @@ body {
     <div style="flex:1" onclick="closeSettings()"></div>
   </div>
 
+  <!-- ══ HISTORY OVERLAY ══ -->
   <div class="overlay" id="ov-hist" onclick="bgClose(event,'ov-hist')">
     <div class="panel">
       <div class="panel-header">
@@ -448,24 +504,17 @@ body {
     <div style="flex:1" onclick="closeHistory()"></div>
   </div>
 
-</div>
+</div><!-- /phone -->
 
 <script>
-// --- REGISTER SERVICE WORKER ---
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').then(reg => console.log('SW ok')).catch(err => console.log('SW fail'));
-  });
-}
-
-// --- STATE ---
+// ── STATE ────────────────────────────────────────────────────────
 let cur='0', expr='', justCalc=false, lastViet='';
 let waitingForOperand=false;
-let history=[], allVoices=[], lastEqTime=0;
+let history=[], allVoices=[];
 let cfg={
   speak:true, readKeys:false, vib:true, sound:false,
   rate:0.9, pitch:1.0, vol:1, voiceIdx:-1,
-  round:2, sep:true, cur:'đ',
+  round:2, sep:true, unit:'đ',
   showViet:true, fontSize:52
 };
 
@@ -479,7 +528,7 @@ const btnEq   = document.getElementById('btn-eq');
 
 const digitNames=['không','một','hai','ba','bốn','năm','sáu','bảy','tám','chín'];
 
-// --- DISPLAY ---
+// ── DISPLAY ──────────────────────────────────────────────────────
 function fmtNum(s){
   if(!cfg.sep||s==='Lỗi')return s;
   const p=s.split('.');
@@ -497,12 +546,12 @@ function updateDisplay(){
     elExpr.textContent = expr || '—';
   }
   const disp = cur==='Lỗi'?'Lỗi':fmtNum(cur);
-  elNum.textContent = disp + (cfg.cur&&justCalc&&cur!=='Lỗi'?' '+cfg.cur:'');
+  elNum.textContent = disp + (cfg.unit&&justCalc&&cur!=='Lỗi'?' '+cfg.unit:'');
   elNum.style.fontSize = cfg.fontSize+'px';
   if(cfg.showViet && lastViet && justCalc){
     elViet.textContent = lastViet;
     elViet.classList.add('on');
-    elCurEl.textContent = cfg.cur||'';
+    elCurEl.textContent = cfg.unit||'';
     elCurEl.classList.add('on');
   } else {
     elViet.textContent = justCalc?'':( cur==='0'?'—':'' );
@@ -520,18 +569,17 @@ function popAnim(){
   elNum.classList.add('pop');
 }
 
-// --- CALC ---
+// ── CALC ──────────────────────────────────────────────────────────
 function appendNum(n){
   doFeedback();
-  if(cfg.readKeys) speakText(n==='00'?'không không':digitNames[parseInt(n)]||n);
+  if(cfg.readKeys) speakText(digitNames[parseInt(n)]||n);
   if(justCalc){cur='';expr='';justCalc=false;lastViet='';waitingForOperand=false;}
   if(waitingForOperand){
-    cur=(n==='00')?'0':n;
+    cur=n;
     waitingForOperand=false;
     updateDisplay();return;
   }
-  if(n==='00'){if(cur==='0')return;cur+='00';}
-  else{if(cur==='0'&&n!=='.')cur=n;else cur+=n;}
+  if(cur==='0'&&n!=='.')cur=n;else cur+=n;
   updateDisplay();
 }
 
@@ -571,8 +619,7 @@ function appendOp(op){
     try{
       res=eval(safe);
       if(!isFinite(res)){cur='Lỗi';expr='';updateDisplay();return;}
-      if(cfg.round>=0)res=parseFloat(res.toFixed(cfg.round));
-      else res=Math.round(res*1e10)/1e10;
+      res=applyRound(res);
       cur=String(res);
     }catch(e){cur='Lỗi';expr='';updateDisplay();return;}
     expr=full+' = '+cur+'\n'+cur+' '+op+' ';
@@ -582,8 +629,18 @@ function appendOp(op){
 }
 
 function percent(){doFeedback();cur=String(parseFloat(cur)/100);updateDisplay();}
-function toggleSign(){doFeedback();if(cur!=='0')cur=cur.startsWith('-')?cur.slice(1):'-'+cur;updateDisplay();}
-function backspace(){doFeedback();if(cur.length>1)cur=cur.slice(0,-1);else cur='0';updateDisplay();}
+
+function toggleSign(){
+  doFeedback();
+  if(cur!=='0')cur=cur.startsWith('-')?cur.slice(1):'-'+cur;
+  updateDisplay();
+}
+
+function backspace(){
+  doFeedback();
+  if(cur.length>1)cur=cur.slice(0,-1);else cur='0';
+  updateDisplay();
+}
 
 function clearAll(){
   doFeedback();
@@ -604,8 +661,7 @@ function calculate(){
   try{
     res=eval(safe);
     if(!isFinite(res)){cur='Lỗi';expr=full+' =';justCalc=true;updateDisplay();return;}
-    if(cfg.round>=0)res=parseFloat(res.toFixed(cfg.round));
-    else res=Math.round(res*1e10)/1e10;
+    res=applyRound(res);
     cur=String(res);
   }catch(e){cur='Lỗi';expr=full+' =';justCalc=true;updateDisplay();return;}
   expr=full+' =';
@@ -617,23 +673,20 @@ function calculate(){
   const t=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
   history.unshift({expr:full+' =',result:cur,viet:lastViet,time:t});
   if(history.length>200)history.pop();
-  if(cfg.speak)speakVietnamese(lastViet);
+  if(cfg.speak) speakVietnamese(lastViet + getUnitText());
 }
 
 function onEqPress(){
   doFeedback();
-  const now=Date.now();
-  if(justCalc && now-lastEqTime<480){
-    if(lastViet)speakVietnamese(lastViet);
-    lastEqTime=0; return;
+  if(justCalc){
+    if(lastViet) speakVietnamese(lastViet + getUnitText());
+    return;
   }
-  lastEqTime=now;
   calculate();
 }
 
-// --- FEEDBACK ---
+// ── FEEDBACK ──────────────────────────────────────────────────────
 function doFeedback(){
-  if(cfg.vib&&navigator.vibrate)navigator.vibrate(12);
   if(cfg.sound)playClick();
 }
 let audioCtx;
@@ -647,7 +700,7 @@ function playClick(){
   }catch(e){}
 }
 
-// --- TIẾNG VIỆT ---
+// ── TIẾNG VIỆT ────────────────────────────────────────────────────
 const _u=['','một','hai','ba','bốn','năm','sáu','bảy','tám','chín'];
 const _t=['mười','mười một','mười hai','mười ba','mười bốn','mười lăm',
           'mười sáu','mười bảy','mười tám','mười chín'];
@@ -693,11 +746,29 @@ function numberToVietnamese(num){
   return r.trim();
 }
 
-// --- SPEECH ---
+// ── SPEECH ────────────────────────────────────────────────────────
 function getVoice(){
   const vs=window.speechSynthesis.getVoices();
   if(cfg.voiceIdx>=0&&vs[cfg.voiceIdx])return vs[cfg.voiceIdx];
   return vs.find(v=>v.lang==='vi-VN'||v.lang.startsWith('vi'))||null;
+}
+function applyRound(res){
+  if(cfg.round===1000||cfg.round==='1000'){
+    const sign=res<0?-1:1;
+    const abs=Math.abs(res);
+    if(abs<1000)return res;
+    const rem=abs%1000;
+    return sign*(rem<=500?abs-rem:abs-rem+1000);
+  }
+  if(cfg.round>=0)return parseFloat(res.toFixed(cfg.round));
+  return Math.round(res*1e10)/1e10;
+}
+function getUnitText(){
+  if(!cfg.unit)return'';
+  if(cfg.unit==='đ')return' đồng';
+  if(cfg.unit==='VNĐ')return' việt nam đồng';
+  if(cfg.unit==='$')return' đô la';
+  return'';
 }
 function speakText(text){
   if(!('speechSynthesis' in window))return;
@@ -735,7 +806,7 @@ function renderVoices(){
   const vi=allVoices.filter(v=>v.lang==='vi-VN'||v.lang.startsWith('vi'));
   const show=vi.length>0?vi:allVoices.slice(0,10);
   if(show.length===0){
-    wrap.innerHTML='<div style="font-size:12px;color:#bbb;padding:5px 0">Không tìm thấy giọng đọc</div>';
+    wrap.innerHTML='<div style="font-size:12px;color:#bbb;padding:5px 0">Không tìm thấy giọng đọc trên thiết bị</div>';
     return;
   }
   wrap.innerHTML='<div class="vlist">'+show.map(v=>{
@@ -750,9 +821,12 @@ function renderVoices(){
     </div>`;
   }).join('')+'</div>';
 }
-function selectVoice(idx){cfg.voiceIdx=idx;renderVoices();speakText('Xin chào');}
+function selectVoice(idx){
+  cfg.voiceIdx=idx;renderVoices();
+  speakText('Xin chào, đây là giọng thử nghiệm');
+}
 
-// --- SETTINGS ---
+// ── SETTINGS ─────────────────────────────────────────────────────
 function openSettings(){loadVoices();applyUI();document.getElementById('ov-set').classList.add('open');}
 function closeSettings(){document.getElementById('ov-set').classList.remove('open');save();}
 function openHistory(){renderHistory();document.getElementById('ov-hist').classList.add('open');}
@@ -764,7 +838,7 @@ function applyUI(){
   s('tog-speak',cfg.speak);s('tog-readkeys',cfg.readKeys);
   s('tog-vib',cfg.vib);s('tog-sound',cfg.sound);s('tog-sep',cfg.sep);s('tog-viet',cfg.showViet);
   s('sl-rate',cfg.rate);s('sl-pitch',cfg.pitch);s('sl-vol',cfg.vol);
-  s('sel-round',cfg.round);s('sel-cur',cfg.cur);s('sl-font',cfg.fontSize);
+  s('sel-round',String(cfg.round));s('sel-unit',cfg.unit);s('sl-font',cfg.fontSize);
   document.getElementById('lbl-rate').textContent=cfg.rate.toFixed(1)+'×';
   document.getElementById('lbl-pitch').textContent=cfg.pitch.toFixed(1);
   document.getElementById('lbl-vol').textContent=Math.round(cfg.vol*100)+'%';
@@ -775,7 +849,7 @@ function save(){
   const vl=id=>document.getElementById(id).value;
   cfg.speak=cb('tog-speak');cfg.readKeys=cb('tog-readkeys');
   cfg.vib=cb('tog-vib');cfg.sound=cb('tog-sound');cfg.sep=cb('tog-sep');cfg.showViet=cb('tog-viet');
-  cfg.round=parseInt(vl('sel-round'));cfg.cur=vl('sel-cur');
+  cfg.round=parseInt(vl('sel-round'));cfg.unit=vl('sel-unit');
   updateDisplay();
 }
 function updRate(v){cfg.rate=parseFloat(v);document.getElementById('lbl-rate').textContent=parseFloat(v).toFixed(1)+'×';}
@@ -783,7 +857,7 @@ function updPitch(v){cfg.pitch=parseFloat(v);document.getElementById('lbl-pitch'
 function updVol(v){cfg.vol=parseFloat(v);document.getElementById('lbl-vol').textContent=Math.round(v*100)+'%';}
 function updFont(v){cfg.fontSize=parseInt(v);document.getElementById('lbl-font').textContent=v+'px';elNum.style.fontSize=v+'px';}
 
-// --- HISTORY ---
+// ── HISTORY ───────────────────────────────────────────────────────
 function renderHistory(){
   const el=document.getElementById('h-list');
   if(history.length===0){el.innerHTML='<div class="h-empty">Chưa có phép tính nào</div>';return;}
@@ -791,7 +865,7 @@ function renderHistory(){
     <div class="h-item" onclick="useHistory(${i})">
       <div class="h-time">${h.time}</div>
       <div class="h-expr">${h.expr}</div>
-      <div class="h-num">${fmtNum(h.result)}${cfg.cur?' '+cfg.cur:''}</div>
+      <div class="h-num">${fmtNum(h.result)}${cfg.unit?' '+cfg.unit:''}</div>
       <div class="h-viet">${h.viet}</div>
     </div>
   `).join('');
@@ -799,7 +873,7 @@ function renderHistory(){
 function useHistory(i){const h=history[i];cur=h.result;expr='';justCalc=true;lastViet=h.viet;updateDisplay();closeHistory();}
 function clearHistory(){history=[];renderHistory();}
 
-// --- KEYBOARD ---
+// ── KEYBOARD ─────────────────────────────────────────────────────
 document.addEventListener('keydown',e=>{
   if(e.key>='0'&&e.key<='9')appendNum(e.key);
   else if(e.key==='.'||e.key===',')appendDot();
@@ -812,9 +886,25 @@ document.addEventListener('keydown',e=>{
   else if(e.key==='Escape')clearAll();
 });
 
-if('speechSynthesis' in window){window.speechSynthesis.getVoices();window.speechSynthesis.onvoiceschanged=loadVoices;}
+// ── SERVICE WORKER ────────────────────────────────────────────────
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  });
+}
+
+// ── INIT ─────────────────────────────────────────────────────────
+if('speechSynthesis' in window){
+  window.speechSynthesis.getVoices();
+  window.speechSynthesis.onvoiceschanged=loadVoices;
+}
+
+document.getElementById('phone').addEventListener('touchstart', function(e){
+  const btn=e.target.closest('.btn');
+  if(btn&&cfg.vib){ try{navigator.vibrate(30);}catch(er){} }
+},{passive:true});
+
 updateDisplay();
 </script>
 </body>
 </html>
-
