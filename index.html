@@ -526,8 +526,8 @@ body {
 // ── STATE ────────────────────────────────────────────────────────
 let cur='0', expr='', justCalc=false, lastViet='';
 let waitingForOperand=false;
-// fullExpr: chuỗi phép tính đầy đủ người dùng nhập (dùng cho lịch sử)
-let fullExpr='';
+// tokens: mảng lưu từng phần người dùng nhập ['450',' × ','25',' × ','38']
+let tokens=[];
 let history=[], allVoices=[];
 
 // Cài đặt mặc định
@@ -633,68 +633,94 @@ function popAnim(){
 }
 
 // ── CALC ──────────────────────────────────────────────────────────
+// tokens = mảng lưu từng phần người dùng nhập: ['450',' × ','25',' × ','38']
+// Dùng để ghép lịch sử đầy đủ, không bao giờ bị lặp.
+
+function tokensToStr(){ return tokens.join(''); }
+
 function appendNum(n){
   doFeedback(keyLabel(n));
   if(justCalc){
-    cur='';expr='';fullExpr='';justCalc=false;lastViet='';waitingForOperand=false;
+    // Bắt đầu phép tính mới hoàn toàn
+    cur=''; expr=''; tokens=[]; justCalc=false; lastViet=''; waitingForOperand=false;
   }
   if(waitingForOperand){
+    // Số đầu tiên sau toán tử → thêm token số mới
     cur=n; waitingForOperand=false;
-    fullExpr+=n;
-    updateDisplay();return;
+    tokens.push(n);
+    updateDisplay(); return;
   }
-  if(cur==='0'&&n!=='.')cur=n;else cur+=n;
-  fullExpr+=n;
+  // Tiếp tục gõ số: cập nhật token cuối (đang là số)
+  if(cur==='0'&&n!=='.') cur=n; else cur+=n;
+  // Thay token cuối bằng cur hiện tại
+  if(tokens.length && !/[+−×÷]/.test(tokens[tokens.length-1])){
+    tokens[tokens.length-1]=cur;
+  } else {
+    tokens.push(cur);
+  }
   updateDisplay();
 }
 
 function appendDot(){
   doFeedback(',');
-  if(justCalc){cur='0';expr='';fullExpr='';justCalc=false;lastViet='';waitingForOperand=false;}
-  if(waitingForOperand){cur='0';fullExpr+='0';waitingForOperand=false;}
-  if(!cur.includes('.')){cur+='.';fullExpr+='.';}
+  if(justCalc){cur='0';expr='';tokens=[];justCalc=false;lastViet='';waitingForOperand=false;}
+  if(waitingForOperand){
+    cur='0'; waitingForOperand=false;
+    tokens.push('0');
+  }
+  if(!cur.includes('.')){
+    cur+='.';
+    if(tokens.length && !/[+−×÷]/.test(tokens[tokens.length-1])){
+      tokens[tokens.length-1]=cur;
+    } else {
+      tokens.push(cur);
+    }
+  }
   updateDisplay();
 }
 
 function appendOp(op){
   doFeedback(op);
   if(justCalc){
-    // Tiếp tục từ kết quả vừa có; fullExpr bắt đầu lại từ kết quả
-    fullExpr=cur+' '+op+' ';
+    // Tiếp tục từ kết quả — bắt đầu tokens mới từ kết quả đó
+    tokens=[cur,' '+op+' '];
     expr=cur+' '+op+' ';
     justCalc=false; lastViet='';
     waitingForOperand=true;
     updateDisplay(); return;
   }
   if(waitingForOperand){
-    // Thay toán tử cuối
+    // Thay toán tử cuối (người dùng đổi ý)
+    if(tokens.length && /[+−×÷]/.test(tokens[tokens.length-1])){
+      tokens[tokens.length-1]=' '+op+' ';
+    }
     if(expr.includes('\n')){
       const parts=expr.split('\n');
-      parts[1]=parts[1].replace(/[+−×÷]\s*$/,'')+op+' ';
+      parts[1]=parts[1].replace(/[+−×÷]\s*$/,op+' ');
       expr=parts.join('\n');
     } else {
-      expr=expr.replace(/[+−×÷]\s*$/,'')+op+' ';
+      expr=expr.replace(/[+−×÷]\s*$/,op+' ');
     }
-    fullExpr=fullExpr.replace(/\s*[+−×÷]\s*$/,'')+' '+op+' ';
     updateDisplay(); return;
   }
   if(expr===''){
+    // Toán tử đầu tiên
+    tokens=[cur,' '+op+' '];
     expr=cur+' '+op+' ';
-    fullExpr=fullExpr||cur;
-    fullExpr+=' '+op+' ';
   } else {
-    // Tính trung gian
+    // Tính trung gian (VD: 450 × 25 rồi nhấn ×)
     const activeExpr=expr.includes('\n')?expr.split('\n').pop():expr;
     const full=activeExpr+cur;
     const safe=full.replace(/÷/g,'/').replace(/×/g,'*').replace(/−/g,'-');
     let res;
     try{
       res=eval(safe);
-      if(!isFinite(res)){cur='Lỗi';expr='';fullExpr='';updateDisplay();return;}
+      if(!isFinite(res)){cur='Lỗi';expr='';tokens=[];updateDisplay();return;}
       res=applyRound(res);
       cur=String(res);
-    }catch(e){cur='Lỗi';expr='';fullExpr='';updateDisplay();return;}
-    fullExpr+=' '+op+' ';
+    }catch(e){cur='Lỗi';expr='';tokens=[];updateDisplay();return;}
+    // Thêm toán tử mới vào tokens (KHÔNG thêm số cur — đã có trong tokens trước đó)
+    tokens.push(' '+op+' ');
     expr=full+' = '+cur+'\n'+cur+' '+op+' ';
   }
   waitingForOperand=true;
@@ -703,34 +729,37 @@ function appendOp(op){
 
 function percent(){
   doFeedback('%');
-  const prev=cur;
   cur=String(parseFloat(cur)/100);
-  // Cập nhật fullExpr: thay số vừa nhập thành phiên bản %
-  fullExpr=fullExpr.slice(0,fullExpr.lastIndexOf(prev))+cur;
+  // Cập nhật token số cuối
+  if(tokens.length && !/[+−×÷]/.test(tokens[tokens.length-1])){
+    tokens[tokens.length-1]=cur;
+  }
   updateDisplay();
 }
 
 function toggleSign(){
   doFeedback('+/−');
   if(cur!=='0'){
-    const old=cur;
     cur=cur.startsWith('-')?cur.slice(1):'-'+cur;
-    const idx=fullExpr.lastIndexOf(old);
-    if(idx>=0)fullExpr=fullExpr.slice(0,idx)+cur+fullExpr.slice(idx+old.length);
+    if(tokens.length && !/[+−×÷]/.test(tokens[tokens.length-1])){
+      tokens[tokens.length-1]=cur;
+    }
   }
   updateDisplay();
 }
 
 function backspace(){
   doFeedback('⌫');
-  if(cur.length>1){cur=cur.slice(0,-1);}else{cur='0';}
-  if(fullExpr.length>0)fullExpr=fullExpr.slice(0,-1);
+  if(cur.length>1){ cur=cur.slice(0,-1); }else{ cur='0'; }
+  if(tokens.length && !/[+−×÷]/.test(tokens[tokens.length-1])){
+    if(cur==='0') tokens.pop(); else tokens[tokens.length-1]=cur;
+  }
   updateDisplay();
 }
 
 function clearAll(){
   doFeedback('AC');
-  cur='0';expr='';fullExpr='';justCalc=false;lastViet='';waitingForOperand=false;
+  cur='0';expr='';tokens=[];justCalc=false;lastViet='';waitingForOperand=false;
   elViet.textContent='—';elViet.classList.remove('on');
   elCurEl.textContent='';elCurEl.classList.remove('on');
   elNum.classList.remove('speaking');
@@ -743,9 +772,8 @@ function calculate(){
   const activeExpr = expr.includes('\n') ? expr.split('\n').pop() : expr;
   const full = activeExpr + cur;
   const safe=full.replace(/÷/g,'/').replace(/×/g,'*').replace(/−/g,'-');
-  // fullExpr đầy đủ để lưu lịch sử
-  const histExpr = (fullExpr||full).trimEnd().replace(/[+−×÷]\s*$/,'').trim()
-                   + ' ' + cur + ' =';
+  // Ghép lịch sử từ tokens: sạch, đúng, không lặp
+  const histExpr = tokensToStr().trim() + ' =';
   let res;
   try{
     res=eval(safe);
@@ -764,7 +792,7 @@ function calculate(){
   history.unshift({expr:histExpr,result:cur,viet:lastViet,time:t});
   if(history.length>200)history.pop();
   saveToStorage();
-  fullExpr='';
+  tokens=[];
   if(cfg.speak) speakVietnamese(lastViet + getUnitText());
 }
 
@@ -965,7 +993,7 @@ function renderHistory(){
     </div>
   `).join('');
 }
-function useHistory(i){const h=history[i];cur=h.result;expr='';fullExpr='';justCalc=true;lastViet=h.viet;updateDisplay();closeHistory();}
+function useHistory(i){const h=history[i];cur=h.result;expr='';tokens=[];justCalc=true;lastViet=h.viet;updateDisplay();closeHistory();}
 function clearHistory(){history=[];saveToStorage();renderHistory();}
 
 // ── KEYBOARD ─────────────────────────────────────────────────────
