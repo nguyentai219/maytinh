@@ -510,13 +510,49 @@ body {
 // ── STATE ────────────────────────────────────────────────────────
 let cur='0', expr='', justCalc=false, lastViet='';
 let waitingForOperand=false;
+// fullExpr: chuỗi phép tính đầy đủ người dùng nhập (dùng cho lịch sử)
+let fullExpr='';
 let history=[], allVoices=[];
-let cfg={
+
+// Cài đặt mặc định
+const CFG_DEFAULT={
   speak:true, readKeys:false, vib:true, sound:false,
   rate:0.9, pitch:1.0, vol:1, voiceIdx:-1,
   round:2, sep:true, unit:'đ',
   showViet:true, fontSize:52
 };
+
+// ── LOCALSTORAGE PERSISTENCE ──────────────────────────────────────
+const LS_CFG  = 'mtdkq_cfg_v1';
+const LS_HIST = 'mtdkq_hist_v1';
+
+function loadFromStorage(){
+  try{
+    const saved=localStorage.getItem(LS_CFG);
+    if(saved){
+      const parsed=JSON.parse(saved);
+      // Merge: giữ mặc định cho key nào chưa có
+      return Object.assign({},CFG_DEFAULT,parsed);
+    }
+  }catch(e){}
+  return Object.assign({},CFG_DEFAULT);
+}
+
+function saveToStorage(){
+  try{ localStorage.setItem(LS_CFG, JSON.stringify(cfg)); }catch(e){}
+  try{ localStorage.setItem(LS_HIST, JSON.stringify(history.slice(0,200))); }catch(e){}
+}
+
+function loadHistoryFromStorage(){
+  try{
+    const saved=localStorage.getItem(LS_HIST);
+    if(saved) return JSON.parse(saved);
+  }catch(e){}
+  return [];
+}
+
+let cfg = loadFromStorage();
+history = loadHistoryFromStorage();
 
 const elExpr  = document.getElementById('el-expr');
 const elNum   = document.getElementById('el-num');
@@ -526,7 +562,18 @@ const waveEl  = document.getElementById('wave');
 const waveLbl = document.getElementById('wave-lbl');
 const btnEq   = document.getElementById('btn-eq');
 
+// ── TÊN ĐỌC CÁC PHÍM ─────────────────────────────────────────────
 const digitNames=['không','một','hai','ba','bốn','năm','sáu','bảy','tám','chín'];
+const keyNames={
+  '÷':'chia', '×':'nhân', '−':'trừ', '+':'cộng',
+  '%':'phần trăm', '+/−':'đổi dấu', 'AC':'xoá tất cả',
+  '⌫':'xoá', ',':'phẩy', '=':'bằng'
+};
+function keyLabel(k){
+  if(keyNames[k])return keyNames[k];
+  if(/^\d$/.test(k))return digitNames[parseInt(k)];
+  return k;
+}
 
 // ── DISPLAY ──────────────────────────────────────────────────────
 function fmtNum(s){
@@ -571,35 +618,40 @@ function popAnim(){
 
 // ── CALC ──────────────────────────────────────────────────────────
 function appendNum(n){
-  doFeedback();
-  if(cfg.readKeys) speakText(digitNames[parseInt(n)]||n);
-  if(justCalc){cur='';expr='';justCalc=false;lastViet='';waitingForOperand=false;}
+  doFeedback(keyLabel(n));
+  if(justCalc){
+    cur='';expr='';fullExpr='';justCalc=false;lastViet='';waitingForOperand=false;
+  }
   if(waitingForOperand){
-    cur=n;
-    waitingForOperand=false;
+    cur=n; waitingForOperand=false;
+    fullExpr+=n;
     updateDisplay();return;
   }
   if(cur==='0'&&n!=='.')cur=n;else cur+=n;
+  fullExpr+=n;
   updateDisplay();
 }
 
 function appendDot(){
-  doFeedback();
-  if(justCalc){cur='0';expr='';justCalc=false;lastViet='';waitingForOperand=false;}
-  if(waitingForOperand){cur='0';waitingForOperand=false;}
-  if(!cur.includes('.'))cur+='.';
+  doFeedback(',');
+  if(justCalc){cur='0';expr='';fullExpr='';justCalc=false;lastViet='';waitingForOperand=false;}
+  if(waitingForOperand){cur='0';fullExpr+='0';waitingForOperand=false;}
+  if(!cur.includes('.')){cur+='.';fullExpr+='.';}
   updateDisplay();
 }
 
 function appendOp(op){
-  doFeedback();
+  doFeedback(op);
   if(justCalc){
+    // Tiếp tục từ kết quả vừa có; fullExpr bắt đầu lại từ kết quả
+    fullExpr=cur+' '+op+' ';
     expr=cur+' '+op+' ';
     justCalc=false; lastViet='';
     waitingForOperand=true;
     updateDisplay(); return;
   }
   if(waitingForOperand){
+    // Thay toán tử cuối
     if(expr.includes('\n')){
       const parts=expr.split('\n');
       parts[1]=parts[1].replace(/[+−×÷]\s*$/,'')+op+' ';
@@ -607,44 +659,62 @@ function appendOp(op){
     } else {
       expr=expr.replace(/[+−×÷]\s*$/,'')+op+' ';
     }
+    fullExpr=fullExpr.replace(/\s*[+−×÷]\s*$/,'')+' '+op+' ';
     updateDisplay(); return;
   }
   if(expr===''){
     expr=cur+' '+op+' ';
+    fullExpr=fullExpr||cur;
+    fullExpr+=' '+op+' ';
   } else {
+    // Tính trung gian
     const activeExpr=expr.includes('\n')?expr.split('\n').pop():expr;
     const full=activeExpr+cur;
     const safe=full.replace(/÷/g,'/').replace(/×/g,'*').replace(/−/g,'-');
     let res;
     try{
       res=eval(safe);
-      if(!isFinite(res)){cur='Lỗi';expr='';updateDisplay();return;}
+      if(!isFinite(res)){cur='Lỗi';expr='';fullExpr='';updateDisplay();return;}
       res=applyRound(res);
       cur=String(res);
-    }catch(e){cur='Lỗi';expr='';updateDisplay();return;}
+    }catch(e){cur='Lỗi';expr='';fullExpr='';updateDisplay();return;}
+    fullExpr+=' '+op+' ';
     expr=full+' = '+cur+'\n'+cur+' '+op+' ';
   }
   waitingForOperand=true;
   updateDisplay();
 }
 
-function percent(){doFeedback();cur=String(parseFloat(cur)/100);updateDisplay();}
+function percent(){
+  doFeedback('%');
+  const prev=cur;
+  cur=String(parseFloat(cur)/100);
+  // Cập nhật fullExpr: thay số vừa nhập thành phiên bản %
+  fullExpr=fullExpr.slice(0,fullExpr.lastIndexOf(prev))+cur;
+  updateDisplay();
+}
 
 function toggleSign(){
-  doFeedback();
-  if(cur!=='0')cur=cur.startsWith('-')?cur.slice(1):'-'+cur;
+  doFeedback('+/−');
+  if(cur!=='0'){
+    const old=cur;
+    cur=cur.startsWith('-')?cur.slice(1):'-'+cur;
+    const idx=fullExpr.lastIndexOf(old);
+    if(idx>=0)fullExpr=fullExpr.slice(0,idx)+cur+fullExpr.slice(idx+old.length);
+  }
   updateDisplay();
 }
 
 function backspace(){
-  doFeedback();
-  if(cur.length>1)cur=cur.slice(0,-1);else cur='0';
+  doFeedback('⌫');
+  if(cur.length>1){cur=cur.slice(0,-1);}else{cur='0';}
+  if(fullExpr.length>0)fullExpr=fullExpr.slice(0,-1);
   updateDisplay();
 }
 
 function clearAll(){
-  doFeedback();
-  cur='0';expr='';justCalc=false;lastViet='';waitingForOperand=false;
+  doFeedback('AC');
+  cur='0';expr='';fullExpr='';justCalc=false;lastViet='';waitingForOperand=false;
   elViet.textContent='—';elViet.classList.remove('on');
   elCurEl.textContent='';elCurEl.classList.remove('on');
   elNum.classList.remove('speaking');
@@ -657,6 +727,9 @@ function calculate(){
   const activeExpr = expr.includes('\n') ? expr.split('\n').pop() : expr;
   const full = activeExpr + cur;
   const safe=full.replace(/÷/g,'/').replace(/×/g,'*').replace(/−/g,'-');
+  // fullExpr đầy đủ để lưu lịch sử
+  const histExpr = (fullExpr||full).trimEnd().replace(/[+−×÷]\s*$/,'').trim()
+                   + ' ' + cur + ' =';
   let res;
   try{
     res=eval(safe);
@@ -671,13 +744,16 @@ function calculate(){
   popAnim(); updateDisplay();
   const now=new Date();
   const t=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
-  history.unshift({expr:full+' =',result:cur,viet:lastViet,time:t});
+  // Lưu histExpr đầy đủ thay vì full (vốn chỉ là phần cuối khi tính trung gian)
+  history.unshift({expr:histExpr,result:cur,viet:lastViet,time:t});
   if(history.length>200)history.pop();
+  saveToStorage();
+  fullExpr='';
   if(cfg.speak) speakVietnamese(lastViet + getUnitText());
 }
 
 function onEqPress(){
-  doFeedback();
+  doFeedback('=');
   if(justCalc){
     if(lastViet) speakVietnamese(lastViet + getUnitText());
     return;
@@ -686,8 +762,9 @@ function onEqPress(){
 }
 
 // ── FEEDBACK ──────────────────────────────────────────────────────
-function doFeedback(){
-  if(cfg.sound)playClick();
+function doFeedback(label){
+  if(cfg.readKeys && label) speakText(label);
+  if(cfg.sound) playClick();
 }
 let audioCtx;
 function playClick(){
@@ -823,6 +900,7 @@ function renderVoices(){
 }
 function selectVoice(idx){
   cfg.voiceIdx=idx;renderVoices();
+  saveToStorage();
   speakText('Xin chào, đây là giọng thử nghiệm');
 }
 
@@ -851,11 +929,12 @@ function save(){
   cfg.vib=cb('tog-vib');cfg.sound=cb('tog-sound');cfg.sep=cb('tog-sep');cfg.showViet=cb('tog-viet');
   cfg.round=parseInt(vl('sel-round'));cfg.unit=vl('sel-unit');
   updateDisplay();
+  saveToStorage();
 }
-function updRate(v){cfg.rate=parseFloat(v);document.getElementById('lbl-rate').textContent=parseFloat(v).toFixed(1)+'×';}
-function updPitch(v){cfg.pitch=parseFloat(v);document.getElementById('lbl-pitch').textContent=parseFloat(v).toFixed(1);}
-function updVol(v){cfg.vol=parseFloat(v);document.getElementById('lbl-vol').textContent=Math.round(v*100)+'%';}
-function updFont(v){cfg.fontSize=parseInt(v);document.getElementById('lbl-font').textContent=v+'px';elNum.style.fontSize=v+'px';}
+function updRate(v){cfg.rate=parseFloat(v);document.getElementById('lbl-rate').textContent=parseFloat(v).toFixed(1)+'×';saveToStorage();}
+function updPitch(v){cfg.pitch=parseFloat(v);document.getElementById('lbl-pitch').textContent=parseFloat(v).toFixed(1);saveToStorage();}
+function updVol(v){cfg.vol=parseFloat(v);document.getElementById('lbl-vol').textContent=Math.round(v*100)+'%';saveToStorage();}
+function updFont(v){cfg.fontSize=parseInt(v);document.getElementById('lbl-font').textContent=v+'px';elNum.style.fontSize=v+'px';saveToStorage();}
 
 // ── HISTORY ───────────────────────────────────────────────────────
 function renderHistory(){
@@ -870,8 +949,8 @@ function renderHistory(){
     </div>
   `).join('');
 }
-function useHistory(i){const h=history[i];cur=h.result;expr='';justCalc=true;lastViet=h.viet;updateDisplay();closeHistory();}
-function clearHistory(){history=[];renderHistory();}
+function useHistory(i){const h=history[i];cur=h.result;expr='';fullExpr='';justCalc=true;lastViet=h.viet;updateDisplay();closeHistory();}
+function clearHistory(){history=[];saveToStorage();renderHistory();}
 
 // ── KEYBOARD ─────────────────────────────────────────────────────
 document.addEventListener('keydown',e=>{
