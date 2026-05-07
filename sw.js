@@ -1,9 +1,7 @@
 // Service Worker – Máy Tính Đọc Kết Quả
-const CACHE_NAME = 'may-tinh-v2';
+const CACHE_NAME = 'may-tinh-v3';
 
-// Dùng relative path để hoạt động cả localhost lẫn GitHub Pages subdirectory
 const ASSETS = [
-  './',
   './index.html',
   './manifest.json',
   './icons/icon-192x192.png',
@@ -32,18 +30,13 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
-  // Chỉ cache GET, bỏ qua Chrome extensions
   if (e.request.method !== 'GET') return;
   if (!e.request.url.startsWith('http')) return;
-
   e.respondWith(
     caches.match(e.request).then(cached => {
       if (cached) return cached;
       return fetch(e.request).then(response => {
-        // Không cache response lỗi
-        if (!response || response.status !== 200 || response.type === 'opaque') {
-          return response;
-        }
+        if (!response || response.status !== 200 || response.type === 'opaque') return response;
         const clone = response.clone();
         caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
         return response;
