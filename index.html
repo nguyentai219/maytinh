@@ -49,7 +49,7 @@
   --op-top:#bbbec5;  --op-bot:#a4a8b0;  --op-sh:#787c84;
   --ac-top:#e87272;  --ac-bot:#c84848;  --ac-sh:#882020;
   --eq-top:#f5a838;  --eq-bot:#d87018;  --eq-sh:#884800;
-  --gap:7px; --rbtn:13px;
+  --gap:10px; --rbtn:13px;
 }
 
 body {
@@ -91,41 +91,41 @@ body {
   border-radius:14px; border:2px solid #4e8e97;
   box-shadow: inset 0 5px 16px rgba(0,0,0,0.26), inset 0 -2px 6px rgba(255,255,255,0.2),
               0 3px 10px rgba(0,0,0,0.32);
-  padding:10px 15px 10px; flex-shrink:0; position:relative;
-  display:flex; flex-direction:column; gap:0;
+  padding:10px 15px 8px; flex-shrink:0; position:relative;
+  display:flex; flex-direction:column; justify-content:flex-end;
+  min-height:130px;
 }
 
-/* Zone A – phép tính */
-.zone-a {
-  border-bottom:1px solid rgba(0,0,0,0.14);
-  padding-bottom:7px; margin-bottom:6px;
-}
-.zone-lbl {
-  font-size:9px; font-weight:700; color:rgba(0,0,0,0.32);
-  letter-spacing:1.8px; text-transform:uppercase; margin-bottom:2px;
-}
-.zone-expr-text {
+/* Dòng trên: phép tính cũ (mờ, nhỏ) — chỉ hiện khi tính trung gian */
+.disp-history {
   font-family:'Roboto Mono',monospace;
-  font-size:14px; color:rgba(0,0,0,0.6);
-  text-align:right; word-break:break-all; min-height:36px; line-height:1.4;
+  font-size:18px; font-weight:300; color:rgba(0,0,0,0.35);
+  text-align:right; line-height:1.2;
+  min-height:0; overflow:hidden;
+  border-bottom:1px solid rgba(0,0,0,0.12);
+  padding-bottom:5px; margin-bottom:6px;
+  display:none;
 }
+.disp-history.show { display:block; }
 
-/* Zone B – số */
-.zone-b { margin-bottom:4px; }
-.zone-number {
+/* Dòng chính: phép tính đang nhập — to, rõ, căn phải */
+.disp-main {
   font-family:'Roboto Mono',monospace;
-  font-size:52px; font-weight:300; color:#0a0a0a;
-  text-align:right; line-height:1; word-break:break-all;
+  font-weight:300; color:#0a0a0a;
+  text-align:right; line-height:1.05;
+  word-break:break-all;
   transition:color 0.22s; transform-origin:right center;
+  flex:1; display:flex; align-items:flex-end; justify-content:flex-end;
 }
-.zone-number.pop { animation:numPop 0.18s ease-out; }
-@keyframes numPop{0%{transform:scale(1)}50%{transform:scale(1.045)}100%{transform:scale(1)}}
-.zone-number.speaking { color:#003a46; }
+.disp-main.speaking { color:#003a46; }
+.disp-main.pop { animation:numPop 0.18s ease-out; }
+@keyframes numPop{0%{transform:scale(1)}50%{transform:scale(1.035)}100%{transform:scale(1)}}
 
-/* Zone C – hàng cuối: wave trái | chữ Việt phải */
+/* Zone C – sóng âm + chữ Việt */
 .zone-c {
   display:flex; align-items:center; justify-content:space-between;
-  min-height:22px; margin-top:2px; gap:8px;
+  min-height:20px; margin-top:5px; gap:8px; border-top:1px solid rgba(0,0,0,0.1);
+  padding-top:5px;
 }
 .zone-wave-side { display:flex; align-items:center; gap:4px; flex-shrink:0; }
 .wave { display:none; align-items:center; gap:2px; height:16px; }
@@ -144,12 +144,12 @@ body {
 .wave-lbl.on { display:block; }
 .zone-viet-side { display:flex; align-items:baseline; gap:4px; justify-content:flex-end; flex:1; min-width:0; }
 .zone-viet {
-  font-size:12px; font-style:italic; color:rgba(0,0,0,0.38);
+  font-size:11px; font-style:italic; color:rgba(0,0,0,0.38);
   overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
   transition:color 0.2s; text-align:right;
 }
 .zone-viet.on { color:#002c38; font-weight:600; }
-.zone-cur { font-size:11px; font-weight:700; color:rgba(0,0,0,0.3); flex-shrink:0; }
+.zone-cur { font-size:10px; font-weight:700; color:rgba(0,0,0,0.3); flex-shrink:0; }
 .zone-cur.on { color:#003d4a; }
 
 /* ── BUTTON GRID ── */
@@ -181,6 +181,7 @@ body {
     inset 0 1px 0 rgba(255,255,255,0.88),inset 0 -1px 0 rgba(0,0,0,0.07);
   border:1px solid #b2b2b2;
   font-size:28px; font-weight:400; font-family:'Roboto Mono',monospace;
+  letter-spacing:-0.5px;
 }
 /* Operator ÷ × − + */
 .btn-op {
@@ -307,6 +308,21 @@ body {
 .vdot { width:9px; height:9px; border-radius:50%; background:#ddd; flex-shrink:0; }
 .vitem.sel .vdot { background:#e08828; }
 
+/* Phím tắt MK */
+.btn-mk {
+  background:linear-gradient(180deg,#b8d4f0 0%,#88a8d0 100%);
+  box-shadow:0 4px 0 #506080,0 5px 8px rgba(0,0,0,0.22),
+    inset 0 1px 0 rgba(255,255,255,0.75);
+  border:1px solid #607090; color:#0a2040;
+  font-size:11px; font-weight:800;
+}
+.btn-mk.no-val {
+  background:linear-gradient(180deg,#c8d8e8 0%,#a8bcd0 100%);
+  box-shadow:0 4px 0 #708090,0 5px 8px rgba(0,0,0,0.18),
+    inset 0 1px 0 rgba(255,255,255,0.7);
+  border:1px solid #8090a0; color:#3a5a7a; opacity:0.75;
+}
+
 /* History */
 .h-acts { display:flex; gap:8px; padding:10px 16px 4px; }
 .h-clear {
@@ -335,7 +351,7 @@ body {
     <button class="icon-btn" onclick="openSettings()">≡</button>
     <div class="topbar-title">
       <div class="t1">MÁY TÍNH ĐỌC KẾT QUẢ</div>
-      <div class="t2">NHẤN = HAI LẦN ĐỂ ĐỌC LẠI</div>
+      <div class="t2">taidautieng@gmail.com</div>
     </div>
     <button class="icon-btn" onclick="openHistory()">🕘</button>
   </div>
@@ -343,19 +359,13 @@ body {
   <!-- DISPLAY -->
   <div class="display-wrap">
 
-    <!-- Zone A: Phép tính đã nhập -->
-    <div class="zone-a">
-      <div class="zone-lbl">PHÉP TÍNH ĐÃ NHẬP</div>
-      <div class="zone-expr-text" id="el-expr">—</div>
-    </div>
+    <!-- Dòng lịch sử mờ (phép tính cũ — chỉ hiện khi tính trung gian hoặc sau =) -->
+    <div class="disp-history" id="el-history"></div>
 
-    <!-- Zone B: Kết quả số -->
-    <div class="zone-b">
-      <div class="zone-lbl">KẾT QUẢ</div>
-      <div class="zone-number" id="el-num">0</div>
-    </div>
+    <!-- Dòng chính: phép tính đang nhập hoặc kết quả -->
+    <div class="disp-main" id="el-main">0</div>
 
-    <!-- Zone C: wave bên trái | chữ Việt bên phải -->
+    <!-- Zone C: sóng âm + chữ Việt -->
     <div class="zone-c">
       <div class="zone-wave-side">
         <div class="wave" id="wave"><span></span><span></span><span></span><span></span><span></span></div>
@@ -371,9 +381,15 @@ body {
   <!-- BUTTONS -->
   <div class="btn-grid">
 
-    <!-- Row 1: AC  %  +/−  ÷ -->
-    <div class="btn-row r4">
+    <!-- Row 1: AC  MK  %  +/−  ÷  (5 nút) -->
+    <div class="btn-row" style="grid-template-columns:repeat(5,1fr);">
       <button class="btn btn-ac" onclick="clearAll()">AC</button>
+      <button class="btn btn-mk no-val" id="btn-mk" onclick="appendMK()">
+        <span style="display:flex;flex-direction:column;align-items:center;gap:1px;line-height:1.2">
+          <span id="mk-label" style="font-size:9px;font-weight:900;letter-spacing:0.3px">⚡MK</span>
+          <span id="mk-val" style="font-size:12px;font-weight:700;font-family:'Roboto Mono',monospace;max-width:52px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block"></span>
+        </span>
+      </button>
       <button class="btn btn-fn" onclick="percent()">%</button>
       <button class="btn btn-fn" onclick="toggleSign()">+/−</button>
       <button class="btn btn-op" onclick="appendOp('÷')">÷</button>
@@ -403,12 +419,18 @@ body {
       <button class="btn btn-op" onclick="appendOp('+')">+</button>
     </div>
 
-    <!-- Row 5: 0 (rộng gấp đôi)  ,  ⌫  = -->
-    <div class="btn-row" style="grid-template-columns: 2fr 1fr 1fr 1fr;">
+    <!-- Row 5: 000  0  ,  ⌫  = -->
+    <div class="btn-row" style="grid-template-columns:repeat(5,1fr);">
+      <button class="btn btn-n" onclick="appendNum('000')">000</button>
       <button class="btn btn-n" onclick="appendNum('0')">0</button>
       <button class="btn btn-n" onclick="appendDot()" style="font-size:26px">,</button>
       <button class="btn btn-back" onclick="backspace()">⌫</button>
-      <button class="btn btn-eq" id="btn-eq" onclick="onEqPress()">=</button>
+      <button class="btn btn-eq" id="btn-eq" onclick="onEqPress()">
+        <span style="display:flex;flex-direction:column;align-items:center;gap:1px;line-height:1">
+          <span style="font-size:10px;opacity:0.82">🔊</span>
+          <span style="font-size:26px">=</span>
+        </span>
+      </button>
     </div>
 
   </div>
@@ -419,6 +441,33 @@ body {
       <div class="panel-header">
         <h2>⚙️ Cài đặt</h2>
         <button class="panel-close" onclick="closeSettings()">✕</button>
+      </div>
+
+      <div class="s-sec">
+        <h3>⚡ Phím tắt số ghi nhớ (MK)</h3>
+        <div class="s-item" style="flex-direction:column;align-items:flex-start;gap:8px">
+          <div>
+            <div class="s-lbl">Số ghi nhớ (toán hạng A)</div>
+            <div class="s-sub">Nhấn phím MK thay cho việc gõ số này. VD: giá nhập hàng, số lượng cố định...</div>
+          </div>
+          <div style="display:flex;gap:8px;width:100%;align-items:center">
+            <input type="number" id="inp-mk" placeholder="Nhập số..." inputmode="decimal"
+              style="flex:1;padding:10px 12px;border:1.5px solid #ddd;border-radius:10px;
+                     font-size:16px;font-family:'Roboto Mono',monospace;outline:none;
+                     background:#f8f8fa;color:#1a1a1a;"
+              oninput="previewMK(this.value)">
+            <button onclick="saveMK()" style="padding:10px 16px;border:none;border-radius:10px;
+              background:linear-gradient(180deg,#f5a838,#d87018);color:#fff;
+              font-size:13px;font-weight:800;cursor:pointer;white-space:nowrap;">
+              Lưu
+            </button>
+            <button onclick="clearMK()" style="padding:10px 12px;border:none;border-radius:10px;
+              background:#f0f0f2;color:#888;font-size:13px;font-weight:700;cursor:pointer;">
+              Xoá
+            </button>
+          </div>
+          <div id="mk-preview" style="font-size:12px;color:#aaa;padding:2px 0;"></div>
+        </div>
       </div>
 
       <div class="s-sec">
@@ -528,14 +577,17 @@ let cur='0', expr='', justCalc=false, lastViet='';
 let waitingForOperand=false;
 // tokens: mảng lưu từng phần người dùng nhập ['450',' × ','25',' × ','38']
 let tokens=[];
+// histExprSaved: lưu chuỗi đầy đủ để hiện dòng mờ sau khi nhấn =
+let histExprSaved='';
 let history=[], allVoices=[];
 
-// Cài đặt mặc định
+// Cài đặt mặc định — unit rỗng = không hiện đơn vị
 const CFG_DEFAULT={
   speak:true, readKeys:false, vib:true, sound:false,
   rate:0.9, pitch:1.0, vol:1, voiceIdx:-1,
-  round:2, sep:true, unit:'đ',
-  showViet:true, fontSize:52
+  round:2, sep:true, unit:'',
+  showViet:true, fontSize:52,
+  mkVal:''
 };
 
 // ── LOCALSTORAGE PERSISTENCE ──────────────────────────────────────
@@ -547,8 +599,11 @@ function loadFromStorage(){
     const saved=localStorage.getItem(LS_CFG);
     if(saved){
       const parsed=JSON.parse(saved);
-      // Merge: giữ mặc định cho key nào chưa có
-      return Object.assign({},CFG_DEFAULT,parsed);
+      const merged = Object.assign({},CFG_DEFAULT);
+      for(const k in parsed){
+        if(parsed[k]!==undefined && parsed[k]!==null) merged[k]=parsed[k];
+      }
+      return merged;
     }
   }catch(e){}
   return Object.assign({},CFG_DEFAULT);
@@ -570,13 +625,97 @@ function loadHistoryFromStorage(){
 let cfg = loadFromStorage();
 history = loadHistoryFromStorage();
 
-const elExpr  = document.getElementById('el-expr');
-const elNum   = document.getElementById('el-num');
+const elHistory = document.getElementById('el-history');
+const elMain    = document.getElementById('el-main');
 const elViet  = document.getElementById('el-viet');
 const elCurEl = document.getElementById('el-cur');
 const waveEl  = document.getElementById('wave');
 const waveLbl = document.getElementById('wave-lbl');
 const btnEq   = document.getElementById('btn-eq');
+
+// ── DISPLAY ──────────────────────────────────────────────────────
+function fmtNum(s){
+  if(!cfg.sep||s==='Lỗi')return s;
+  const p=s.split('.');
+  p[0]=p[0].replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+  return p.join(',');
+}
+
+// Tính font size tự động theo độ dài chuỗi
+function calcFontSize(text){
+  const len = text.length;
+  if(len<=6)  return 52;
+  if(len<=9)  return 42;
+  if(len<=12) return 34;
+  if(len<=16) return 26;
+  return 20;
+}
+
+function updateDisplay(){
+  let mainText = '';
+  let histText = '';
+
+  if(justCalc){
+    // Sau = : dòng mờ trên = TOÀN BỘ phép tính (từ tokens đã lưu trong histExprSaved)
+    const resultDisp = (cur==='Lỗi') ? 'Lỗi' : fmtNum(cur)+(cfg.unit?' '+cfg.unit:'');
+    mainText = resultDisp;
+    histText = escHtml(histExprSaved || expr);
+  } else if(waitingForOperand){
+    // Vừa nhấn toán tử giữa chừng:
+    // dòng chính = kết quả trung gian + toán tử (dòng active của expr)
+    const activeLine = expr.includes('\n') ? expr.split('\n').pop() : expr;
+    mainText = escHtml(activeLine.trimEnd());
+    // dòng mờ = TOÀN BỘ tokens đã nhập (kể cả các bước trước)
+    histText = escHtml(tokensToStr().trimEnd());
+  } else {
+    // Đang nhập số: dòng chính = toàn bộ tokens
+    const live = tokensToStr() || cur;
+    mainText = escHtml(live);
+    // không hiện dòng mờ khi đang nhập bình thường
+    histText = '';
+  }
+
+  // Font size tự động
+  const plain = mainText.replace(/<[^>]+>/g,'');
+  const fs = calcFontSize(plain);
+  elMain.style.fontSize = fs + 'px';
+  elMain.innerHTML = mainText || '0';
+
+  // Dòng lịch sử mờ
+  if(histText){
+    elHistory.innerHTML = histText;
+    elHistory.classList.add('show');
+    const hPlain = histText.replace(/<[^>]+>/g,'');
+    elHistory.style.fontSize = Math.min(calcFontSize(hPlain) * 0.62, 17) + 'px';
+  } else {
+    elHistory.innerHTML = '';
+    elHistory.classList.remove('show');
+  }
+
+  // Chữ Việt + đơn vị
+  if(cfg.showViet && lastViet && justCalc){
+    elViet.textContent = lastViet;
+    elViet.classList.add('on');
+    elCurEl.textContent = cfg.unit||'';
+    elCurEl.classList.add('on');
+  } else {
+    elViet.textContent = '—';
+    elViet.classList.remove('on');
+    elCurEl.textContent = '';
+    elCurEl.classList.remove('on');
+  }
+}
+
+function escHtml(s){
+  if(!s) return '';
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function popAnim(){
+  elMain.classList.remove('pop');
+  void elMain.offsetWidth;
+  elMain.classList.add('pop');
+}
 
 // ── TÊN ĐỌC CÁC PHÍM ─────────────────────────────────────────────
 const digitNames=['không','một','hai','ba','bốn','năm','sáu','bảy','tám','chín'];
@@ -591,47 +730,6 @@ function keyLabel(k){
   return k;
 }
 
-// ── DISPLAY ──────────────────────────────────────────────────────
-function fmtNum(s){
-  if(!cfg.sep||s==='Lỗi')return s;
-  const p=s.split('.');
-  p[0]=p[0].replace(/\B(?=(\d{3})+(?!\d))/g,'.');
-  return p.join(',');
-}
-
-function updateDisplay(){
-  if(expr.includes('\n')){
-    const parts=expr.split('\n');
-    elExpr.innerHTML=
-      '<span style="opacity:0.45;font-size:11px">'+escHtml(parts[0])+'</span>'+
-      '<br><span>'+escHtml(parts[1])+'</span>';
-  } else {
-    elExpr.textContent = expr || '—';
-  }
-  const disp = cur==='Lỗi'?'Lỗi':fmtNum(cur);
-  elNum.textContent = disp + (cfg.unit&&justCalc&&cur!=='Lỗi'?' '+cfg.unit:'');
-  elNum.style.fontSize = cfg.fontSize+'px';
-  if(cfg.showViet && lastViet && justCalc){
-    elViet.textContent = lastViet;
-    elViet.classList.add('on');
-    elCurEl.textContent = cfg.unit||'';
-    elCurEl.classList.add('on');
-  } else {
-    elViet.textContent = justCalc?'':( cur==='0'?'—':'' );
-    elViet.classList.remove('on');
-    elCurEl.textContent='';
-    elCurEl.classList.remove('on');
-  }
-}
-
-function escHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-
-function popAnim(){
-  elNum.classList.remove('pop');
-  void elNum.offsetWidth;
-  elNum.classList.add('pop');
-}
-
 // ── CALC ──────────────────────────────────────────────────────────
 // tokens = mảng lưu từng phần người dùng nhập: ['450',' × ','25',' × ','38']
 // Dùng để ghép lịch sử đầy đủ, không bao giờ bị lặp.
@@ -639,20 +737,22 @@ function popAnim(){
 function tokensToStr(){ return tokens.join(''); }
 
 function appendNum(n){
-  doFeedback(keyLabel(n));
+  doFeedback(n==='000'?'không không không':keyLabel(n));
   if(justCalc){
-    // Bắt đầu phép tính mới hoàn toàn
     cur=''; expr=''; tokens=[]; justCalc=false; lastViet=''; waitingForOperand=false;
   }
   if(waitingForOperand){
-    // Số đầu tiên sau toán tử → thêm token số mới
-    cur=n; waitingForOperand=false;
-    tokens.push(n);
+    cur=(n==='000')?'0':n; waitingForOperand=false;
+    tokens.push(cur);
     updateDisplay(); return;
   }
-  // Tiếp tục gõ số: cập nhật token cuối (đang là số)
-  if(cur==='0'&&n!=='.') cur=n; else cur+=n;
-  // Thay token cuối bằng cur hiện tại
+  // Xử lý 000
+  if(n==='000'){
+    if(cur==='0') return;
+    cur+='000';
+  } else {
+    if(cur==='0'&&n!=='.') cur=n; else cur+=n;
+  }
   if(tokens.length && !/[+−×÷]/.test(tokens[tokens.length-1])){
     tokens[tokens.length-1]=cur;
   } else {
@@ -759,10 +859,10 @@ function backspace(){
 
 function clearAll(){
   doFeedback('AC');
-  cur='0';expr='';tokens=[];justCalc=false;lastViet='';waitingForOperand=false;
+  cur='0';expr='';tokens=[];histExprSaved='';justCalc=false;lastViet='';waitingForOperand=false;
   elViet.textContent='—';elViet.classList.remove('on');
   elCurEl.textContent='';elCurEl.classList.remove('on');
-  elNum.classList.remove('speaking');
+  elMain.classList.remove('speaking');
   window.speechSynthesis&&window.speechSynthesis.cancel();
   stopWave(); updateDisplay();
 }
@@ -772,24 +872,24 @@ function calculate(){
   const activeExpr = expr.includes('\n') ? expr.split('\n').pop() : expr;
   const full = activeExpr + cur;
   const safe=full.replace(/÷/g,'/').replace(/×/g,'*').replace(/−/g,'-');
-  // Ghép lịch sử từ tokens: sạch, đúng, không lặp
-  const histExpr = tokensToStr().trim() + ' =';
+  // Lưu chuỗi đầy đủ TRƯỚC KHI tính (dùng để hiện dòng mờ)
+  const fullTokenStr = tokensToStr().trim() + ' =';
   let res;
   try{
     res=eval(safe);
-    if(!isFinite(res)){cur='Lỗi';expr=full+' =';justCalc=true;updateDisplay();return;}
+    if(!isFinite(res)){cur='Lỗi';expr=full+' =';histExprSaved=fullTokenStr;justCalc=true;updateDisplay();return;}
     res=applyRound(res);
     cur=String(res);
-  }catch(e){cur='Lỗi';expr=full+' =';justCalc=true;updateDisplay();return;}
+  }catch(e){cur='Lỗi';expr=full+' =';histExprSaved=fullTokenStr;justCalc=true;updateDisplay();return;}
   expr=full+' =';
+  histExprSaved=fullTokenStr;
   justCalc=true;
   waitingForOperand=false;
   lastViet=numberToVietnamese(res);
   popAnim(); updateDisplay();
   const now=new Date();
   const t=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
-  // Lưu histExpr đầy đủ thay vì full (vốn chỉ là phần cuối khi tính trung gian)
-  history.unshift({expr:histExpr,result:cur,viet:lastViet,time:t});
+  history.unshift({expr:fullTokenStr, result:cur, viet:lastViet, time:t});
   if(history.length>200)history.pop();
   saveToStorage();
   tokens=[];
@@ -803,6 +903,84 @@ function onEqPress(){
     return;
   }
   calculate();
+}
+
+// ── PHÍM TẮT GHI NHỚ (MK) ────────────────────────────────────────
+function appendMK(){
+  if(!cfg.mkVal) return;
+  doFeedback(cfg.mkVal);
+  // Chèn số phím tắt vào như appendNum
+  if(justCalc){cur='';expr='';tokens=[];justCalc=false;lastViet='';waitingForOperand=false;}
+  if(waitingForOperand){
+    cur=cfg.mkVal; waitingForOperand=false;
+    tokens.push(cfg.mkVal);
+    updateDisplay(); return;
+  }
+  cur=cfg.mkVal;
+  if(tokens.length && !/[+−×÷]/.test(tokens[tokens.length-1])){
+    tokens[tokens.length-1]=cur;
+  } else {
+    tokens.push(cur);
+  }
+  updateDisplay();
+}
+
+function renderMKBtn(){
+  const btn=document.getElementById('btn-mk');
+  const lbl=document.getElementById('mk-label');
+  const val=document.getElementById('mk-val');
+  if(!btn)return;
+  if(cfg.mkVal){
+    btn.classList.remove('no-val');
+    lbl.textContent='⚡ MK';
+    // Chỉ hiện số, không có đơn vị tiền tệ
+    val.textContent=fmtNum(cfg.mkVal);
+    btn._popupLabel=fmtNum(cfg.mkVal);
+  } else {
+    btn.classList.add('no-val');
+    lbl.textContent='⚡ MK';
+    val.textContent='—';
+    btn._popupLabel='MK';
+  }
+}
+
+function previewMK(v){
+  const el=document.getElementById('mk-preview');
+  if(!el)return;
+  if(v && !isNaN(parseFloat(v))){
+    el.textContent='Xem trước: '+fmtNum(String(parseFloat(v)))+(cfg.unit?' '+cfg.unit:'');
+    el.style.color='#e08828';
+  } else {
+    el.textContent=''; el.style.color='#aaa';
+  }
+}
+
+function saveMK(){
+  const inp=document.getElementById('inp-mk');
+  if(!inp)return;
+  const v=inp.value.trim();
+  if(v===''||isNaN(parseFloat(v))){
+    inp.style.borderColor='#e87272';
+    setTimeout(()=>inp.style.borderColor='#ddd',1000);
+    return;
+  }
+  cfg.mkVal=String(parseFloat(v));
+  saveToStorage();
+  renderMKBtn();
+  const el=document.getElementById('mk-preview');
+  if(el){el.textContent='✓ Đã lưu!';el.style.color='#4caf50';}
+  setTimeout(()=>{if(el)el.textContent='';},1500);
+}
+
+function clearMK(){
+  cfg.mkVal='';
+  saveToStorage();
+  const inp=document.getElementById('inp-mk');
+  if(inp)inp.value='';
+  const el=document.getElementById('mk-preview');
+  if(el){el.textContent='Đã xoá phím tắt';el.style.color='#aaa';}
+  setTimeout(()=>{if(el)el.textContent='';},1200);
+  renderMKBtn();
 }
 
 // ── FEEDBACK ──────────────────────────────────────────────────────
@@ -906,7 +1084,7 @@ function speakVietnamese(text){
   u.lang='vi-VN';u.rate=cfg.rate;u.pitch=cfg.pitch;u.volume=cfg.vol;
   const trySpeak=()=>{const v=getVoice();if(v)u.voice=v;window.speechSynthesis.speak(u);};
   u.onstart=()=>{
-    elNum.classList.add('speaking');
+    elMain.classList.add('speaking');
     waveEl.classList.add('on');waveLbl.classList.add('on');
     btnEq.classList.add('speaking-eq');
   };
@@ -916,7 +1094,7 @@ function speakVietnamese(text){
   }else{trySpeak();}
 }
 function stopWave(){
-  elNum.classList.remove('speaking');
+  elMain.classList.remove('speaking');
   waveEl.classList.remove('on');waveLbl.classList.remove('on');
   btnEq.classList.remove('speaking-eq');
 }
@@ -949,7 +1127,11 @@ function selectVoice(idx){
 }
 
 // ── SETTINGS ─────────────────────────────────────────────────────
-function openSettings(){loadVoices();applyUI();document.getElementById('ov-set').classList.add('open');}
+function openSettings(){
+  loadVoices();applyUI();
+  renderMKBtn();
+  document.getElementById('ov-set').classList.add('open');
+}
 function closeSettings(){document.getElementById('ov-set').classList.remove('open');save();}
 function openHistory(){renderHistory();document.getElementById('ov-hist').classList.add('open');}
 function closeHistory(){document.getElementById('ov-hist').classList.remove('open');}
@@ -965,6 +1147,10 @@ function applyUI(){
   document.getElementById('lbl-pitch').textContent=cfg.pitch.toFixed(1);
   document.getElementById('lbl-vol').textContent=Math.round(cfg.vol*100)+'%';
   document.getElementById('lbl-font').textContent=cfg.fontSize+'px';
+  // MK
+  const inp=document.getElementById('inp-mk');
+  if(inp) inp.value=cfg.mkVal||'';
+  previewMK(cfg.mkVal||'');
 }
 function save(){
   const cb=id=>document.getElementById(id).checked;
@@ -978,7 +1164,7 @@ function save(){
 function updRate(v){cfg.rate=parseFloat(v);document.getElementById('lbl-rate').textContent=parseFloat(v).toFixed(1)+'×';saveToStorage();}
 function updPitch(v){cfg.pitch=parseFloat(v);document.getElementById('lbl-pitch').textContent=parseFloat(v).toFixed(1);saveToStorage();}
 function updVol(v){cfg.vol=parseFloat(v);document.getElementById('lbl-vol').textContent=Math.round(v*100)+'%';saveToStorage();}
-function updFont(v){cfg.fontSize=parseInt(v);document.getElementById('lbl-font').textContent=v+'px';elNum.style.fontSize=v+'px';saveToStorage();}
+function updFont(v){cfg.fontSize=parseInt(v);document.getElementById('lbl-font').textContent=v+'px';saveToStorage();}
 
 // ── HISTORY ───────────────────────────────────────────────────────
 function renderHistory(){
@@ -1028,6 +1214,7 @@ document.getElementById('phone').addEventListener('touchstart', function(e){
 },{passive:true});
 
 updateDisplay();
+renderMKBtn();
 </script>
 </body>
 </html>
