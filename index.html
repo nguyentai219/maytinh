@@ -591,8 +591,14 @@ const CFG_DEFAULT={
 };
 
 // ── LOCALSTORAGE PERSISTENCE ──────────────────────────────────────
-const LS_CFG  = 'mtdkq_cfg_v1';
-const LS_HIST = 'mtdkq_hist_v1';
+const LS_CFG  = 'maytinh_cfg_v1';
+const LS_HIST = 'maytinh_hist_v1';
+// Chuyển dữ liệu sang khoá có tiền tố riêng của app (1 lần, KHÔNG xoá khoá cũ vì app khác cùng tên miền có thể đang dùng) — các app trên
+// nguyentai219.github.io dùng chung localStorage nên khoá phải có tiền tố riêng để không đè nhau.
+(function(){ try{ if (localStorage.getItem('maytinh_migrated_v1')) return;
+  [['mtdkq_cfg_v1','maytinh_cfg_v1'],['mtdkq_hist_v1','maytinh_hist_v1']].forEach(function(p){ var v = localStorage.getItem(p[0]);
+    if (v !== null && localStorage.getItem(p[1]) === null) localStorage.setItem(p[1], v); });
+  localStorage.setItem('maytinh_migrated_v1', '1'); }catch(e){} })();
 
 function loadFromStorage(){
   try{
